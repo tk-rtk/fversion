@@ -110,8 +110,8 @@
         if(count >= MAX){
           stopTimer();
           const totalSec = Math.floor((Date.now() - startTime)/1000);
-          headline.textContent = "何もありません。";
-          sub.textContent = `あなたが無駄にした時間＝${formatTime(totalSec)}`;
+          headline.textContent = "おっと、ここには何もありませんよ。";
+          sub.textContent = `あなたが無駄にした時間は=${formatTime(totalSec)}`;
           remainingEl.textContent = "勉強しましょう。";
           timerDisplay.textContent = "";
           clickBtn.disabled = true;
