@@ -113,4 +113,62 @@
             headline.textContent = "共通テスト3日前なのに余裕だね。";
             sub.textContent = "";
           } else {
-            headline.textContent = "なにやってるんですか
+            headline.textContent = "ここには何もないよ";
+            sub.textContent = `あなたが無駄にした時間＝${formatTime(totalSec)}`;
+          }
+          remainingEl.textContent = "勉強しましょう。";
+          timerDisplay.textContent = "";
+          clickBtn.disabled = true;
+          card.style.cursor = 'default';
+        } else{
+          headline.innerHTML = `残り <span class="big-number">${remaining}</span> 回`;
+          sub.textContent = "カードをクリックするか「クリック」ボタンを押してください。";
+          remainingEl.textContent = `残り: ${remaining} 回`;
+          clickBtn.disabled = false;
+          card.style.cursor = 'pointer';
+          updateTimer();
+        }
+      }
+
+      function save(){
+        localStorage.setItem(STORAGE_KEY, count);
+        if(startTime) localStorage.setItem(TIME_KEY, startTime);
+      }
+
+      function doClick(){
+        if(count >= MAX) return;
+        startTimerIfNeeded();
+        count++;
+        save();
+        clickBtn.animate([{transform:'scale(1)'},{transform:'scale(0.95)'},{transform:'scale(1)'}], {duration:120});
+        updateUI();
+      }
+
+      if(startTime && count < MAX){
+        timerInterval = setInterval(updateTimer,1000);
+      }
+      updateUI();
+
+      clickBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        doClick();
+      });
+      card.addEventListener('click', (e)=>{
+        if(e.target===clickBtn || e.target===resetBtn) return;
+        doClick();
+      });
+
+      resetBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(!confirm('本当にリセットしますか？ 進捗は消えます。')) return;
+        count = 0;
+        startTime = null;
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(TIME_KEY);
+        if(timerInterval) clearInterval(timerInterval);
+        updateUI();
+      });
+    })();
+  </script>
+</body>
+</html>
