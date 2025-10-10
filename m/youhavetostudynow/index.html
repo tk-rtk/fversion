@@ -54,14 +54,14 @@
       <button id="resetBtn" class="secondary">リセット</button>
     </div>
 
-    <div class="smallnote">※ 進捗はこのブラウザに保存されます。</div>
+    <div class="smallnote">※ 進捗はこのブラウザに保存されます（ページ更新で消えません）。</div>
   </div>
 
   <script>
     (function(){
       const MAX = 100;
-      const STORAGE_KEY = 'click_challenge_count_v3';
-      const TIME_KEY = 'click_challenge_start_time_v3';
+      const STORAGE_KEY = 'click_challenge_count_v4';
+      const TIME_KEY = 'click_challenge_start_time_v4';
 
       const card = document.getElementById('card');
       const clickBtn = document.getElementById('clickBtn');
@@ -75,7 +75,6 @@
       let startTime = null;
       let timerInterval = null;
 
-      // localStorage から読み込み
       const savedCount = localStorage.getItem(STORAGE_KEY);
       const savedTime = localStorage.getItem(TIME_KEY);
       if(savedCount) count = parseInt(savedCount,10);
@@ -110,62 +109,8 @@
         if(count >= MAX){
           stopTimer();
           const totalSec = Math.floor((Date.now() - startTime)/1000);
-          headline.textContent = "ここには何もないよ。";
-          sub.textContent = `あなたが無駄にした時間は${formatTime(totalSec)}`;
-          remainingEl.textContent = "勉強しましょう。";
-          timerDisplay.textContent = "";
-          clickBtn.disabled = true;
-          card.style.cursor = 'default';
-        }else{
-          headline.innerHTML = `残り <span class="big-number">${remaining}</span> 回`;
-          sub.textContent = "カードをクリックするか「クリック」ボタンを押してください。";
-          remainingEl.textContent = `残り: ${remaining} 回`;
-          clickBtn.disabled = false;
-          card.style.cursor = 'pointer';
-          updateTimer();
-        }
-      }
-
-      function save(){
-        localStorage.setItem(STORAGE_KEY, count);
-        if(startTime) localStorage.setItem(TIME_KEY, startTime);
-      }
-
-      function doClick(){
-        if(count >= MAX) return;
-        startTimerIfNeeded();
-        count++;
-        save();
-        clickBtn.animate([{transform:'scale(1)'},{transform:'scale(0.95)'},{transform:'scale(1)'}], {duration:120});
-        updateUI();
-      }
-
-      // 初期描画
-      if(startTime && count < MAX){
-        timerInterval = setInterval(updateTimer,1000);
-      }
-      updateUI();
-
-      clickBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        doClick();
-      });
-      card.addEventListener('click', (e)=>{
-        if(e.target===clickBtn || e.target===resetBtn) return;
-        doClick();
-      });
-
-      resetBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if(!confirm('本当にリセットしますか？ 進捗は消えます。')) return;
-        count = 0;
-        startTime = null;
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(TIME_KEY);
-        if(timerInterval) clearInterval(timerInterval);
-        updateUI();
-      });
-    })();
-  </script>
-</body>
-</html>
+          if(totalSec <= 6){
+            headline.textContent = "共通テスト3日前なのに余裕だね。";
+            sub.textContent = "";
+          } else {
+            headline.textContent = "なにやってるんですか
