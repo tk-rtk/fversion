@@ -44,7 +44,7 @@
 <body>
   <div class="card" id="card">
     <div class="headline" id="headlineText">100回クリックして</div>
-    <div class="sub" id="subText">カードをクリックするか下のボタンを押してください。6秒以内を目指そう！！</div>
+    <div class="sub" id="subText">カードをクリックするか下のボタンを押してください。7秒以内を目指そう！！</div>
 
     <div class="counter" id="remaining">残り: 100 回</div>
     <div class="time" id="timerDisplay"></div>
@@ -109,7 +109,7 @@
         if(count >= MAX){
           stopTimer();
           const totalSec = Math.floor((Date.now() - startTime)/1000);
-          if(totalSec <= 6){
+          if(totalSec <= 7){
             headline.textContent = "共通テスト3日前なのに余裕だね。";
             sub.textContent = "";
           } else {
@@ -122,7 +122,7 @@
           card.style.cursor = 'default';
         } else{
           headline.innerHTML = `残り <span class="big-number">${remaining}</span> 回`;
-          sub.textContent = "カードをクリックするか「クリック」ボタンを押してください。";
+          sub.textContent = "カードをクリックするか「クリック」ボタンを押してください。7秒以内だと、、、？";
           remainingEl.textContent = `残り: ${remaining} 回`;
           clickBtn.disabled = false;
           card.style.cursor = 'pointer';
