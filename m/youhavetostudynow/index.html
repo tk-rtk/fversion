@@ -54,7 +54,7 @@
       <button id="resetBtn" class="secondary">リセット</button>
     </div>
 
-    <div class="smallnote">※ 進捗はこのブラウザに保存されます（ページ更新で消えません）。</div>
+    <div class="smallnote">※ 進捗はこのブラウザに保存されます。</div>
   </div>
 
   <script>
@@ -110,9 +110,9 @@
         if(count >= MAX){
           stopTimer();
           const totalSec = Math.floor((Date.now() - startTime)/1000);
-          headline.textContent = "なにやってるんですか、勉強してください！";
+          headline.textContent = "何もありません。";
           sub.textContent = `あなたが無駄にした時間＝${formatTime(totalSec)}`;
-          remainingEl.textContent = "達成！";
+          remainingEl.textContent = "勉強しましょう。";
           timerDisplay.textContent = "";
           clickBtn.disabled = true;
           card.style.cursor = 'default';
