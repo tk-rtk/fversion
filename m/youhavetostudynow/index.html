@@ -44,7 +44,7 @@
 <body>
   <div class="card" id="card">
     <div class="headline" id="headlineText">100回クリックして</div>
-    <div class="sub" id="subText">カードをクリックするか下のボタンを押してください。7秒以内を目指そう！！</div>
+    <div class="sub" id="subText">100回押してみよう！</div>
 
     <div class="counter" id="remaining">残り: 100 回</div>
     <div class="time" id="timerDisplay"></div>
@@ -113,7 +113,7 @@
             headline.textContent = "共通テスト3日前なのに余裕だね。";
             sub.textContent = "";
           } else {
-            headline.textContent = "これは無意味です";
+            headline.textContent = "↓お疲れ様🎉↓";
             sub.textContent = `あなたが無駄にした時間＝${formatTime(totalSec)}`;
           }
           remainingEl.textContent = "勉強しましょう。";
