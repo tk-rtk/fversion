@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>100回クリックチャレンジ</title>
+  <title>クリックチャレンジ</title>
   <style>
     :root{
       --bg1:#fff7e6; --bg2:#ffe6f0;
@@ -27,13 +27,16 @@
       cursor:pointer;
     }
     .headline{font-size:40px;font-weight:700;color:#111;margin:8px 0;}
-    .big-number{font-size:96px;font-weight:900;color:var(--accent);display:inline-block;line-height:1;}
+    .big-number{font-size:96px;font-weight:900;color:var(--accent);line-height:1;}
     .sub{color:#444;margin-top:6px;font-size:16px;}
     .counter{margin-top:18px;font-size:18px;color:#333;}
-    .controls{margin-top:18px;display:flex;gap:8px;justify-content:center;}
+    .controls{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+    button,input{
+      padding:10px 14px;border-radius:10px;border:1px solid #ddd;
+      font-weight:600;
+    }
     button{
-      padding:10px 14px;border-radius:10px;border:0;background:#111;color:#fff;font-weight:600;cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,0.08);
+      background:#111;color:#fff;cursor:pointer;border:0;
     }
     button.secondary{background:#fff;border:1px solid #ddd;color:#111}
     button:disabled{opacity:0.6;cursor:not-allowed}
@@ -43,25 +46,26 @@
 </head>
 <body>
   <div class="card" id="card">
-    <div class="headline" id="headlineText">100回クリックして</div>
-    <div class="sub" id="subText">100回押してみよう！</div>
+    <div class="headline" id="headlineText"></div>
+    <div class="sub" id="subText"></div>
 
-    <div class="counter" id="remaining">残り: 100 回</div>
+    <div class="counter" id="remaining"></div>
     <div class="time" id="timerDisplay"></div>
 
     <div class="controls">
+      <input type="number" id="targetInput" min="1" value="100">
       <button id="clickBtn">クリック</button>
       <button id="resetBtn" class="secondary">リセット</button>
     </div>
 
-    <div class="smallnote">※ 進捗はこのブラウザに保存されます。</div>
+    <div class="smallnote">※ 進捗と目標回数はこのブラウザに保存されます。</div>
   </div>
 
   <script>
     (function(){
-      const MAX = 100;
-      const STORAGE_KEY = 'click_challenge_count_v4';
-      const TIME_KEY = 'click_challenge_start_time_v4';
+      const COUNT_KEY = 'click_count_v4';
+      const TIME_KEY  = 'click_start_time_v4';
+      const TARGET_KEY = 'click_target_v4';
 
       const card = document.getElementById('card');
       const clickBtn = document.getElementById('clickBtn');
@@ -70,59 +74,45 @@
       const headline = document.getElementById('headlineText');
       const sub = document.getElementById('subText');
       const timerDisplay = document.getElementById('timerDisplay');
+      const targetInput = document.getElementById('targetInput');
 
       let count = 0;
       let startTime = null;
       let timerInterval = null;
 
-      const savedCount = localStorage.getItem(STORAGE_KEY);
-      const savedTime = localStorage.getItem(TIME_KEY);
-      if(savedCount) count = parseInt(savedCount,10);
-      if(savedTime) startTime = parseInt(savedTime,10);
+      // 保存データ読み込み
+      count = Number(localStorage.getItem(COUNT_KEY)) || 0;
+      startTime = Number(localStorage.getItem(TIME_KEY)) || null;
+      targetInput.value = Number(localStorage.getItem(TARGET_KEY)) || 100;
 
       function formatTime(sec){
-        const minutes = Math.floor(sec/60);
-        const seconds = sec % 60;
-        return minutes > 0 ? `${minutes}分${seconds}秒` : `${seconds}秒`;
+        const m = Math.floor(sec/60);
+        const s = sec % 60;
+        return m ? `${m}分${s}秒` : `${s}秒`;
       }
 
       function updateTimer(){
         if(!startTime) return;
-        const elapsed = Math.floor((Date.now() - startTime)/1000);
+        const elapsed = Math.floor((Date.now()-startTime)/1000);
         timerDisplay.textContent = `経過時間: ${formatTime(elapsed)}`;
       }
 
-      function startTimerIfNeeded(){
-        if(!startTime){
-          startTime = Date.now();
-          localStorage.setItem(TIME_KEY, startTime);
-          timerInterval = setInterval(updateTimer, 1000);
-        }
-      }
-
-      function stopTimer(){
-        if(timerInterval) clearInterval(timerInterval);
-      }
-
       function updateUI(){
+        const MAX = Number(targetInput.value);
         const remaining = Math.max(0, MAX - count);
+
         if(count >= MAX){
-          stopTimer();
-          const totalSec = Math.floor((Date.now() - startTime)/1000);
-          if(totalSec <= 7){
-            headline.textContent = "共通テスト3日前なのに余裕だね。";
-            sub.textContent = "";
-          } else {
-            headline.textContent = "お疲れ様🎉";
-            sub.textContent = `あなたが無駄にした時間＝${formatTime(totalSec)}`;
-          }
-          remainingEl.textContent = "勉強しましょう。";
+          clearInterval(timerInterval);
+          const total = Math.floor((Date.now()-startTime)/1000);
+          headline.textContent = "完了！";
+          sub.textContent = `かかった時間：${formatTime(total)}`;
+          remainingEl.textContent = "達成！";
           timerDisplay.textContent = "";
           clickBtn.disabled = true;
           card.style.cursor = 'default';
-        } else{
+        }else{
           headline.innerHTML = `残り <span class="big-number">${remaining}</span> 回`;
-          sub.textContent = "7秒以内に100回押そう！🔥";
+          sub.textContent = "カードまたはボタンをクリックしてください。";
           remainingEl.textContent = `残り: ${remaining} 回`;
           clickBtn.disabled = false;
           card.style.cursor = 'pointer';
@@ -131,43 +121,53 @@
       }
 
       function save(){
-        localStorage.setItem(STORAGE_KEY, count);
+        localStorage.setItem(COUNT_KEY, count);
+        localStorage.setItem(TARGET_KEY, targetInput.value);
         if(startTime) localStorage.setItem(TIME_KEY, startTime);
       }
 
       function doClick(){
+        const MAX = Number(targetInput.value);
         if(count >= MAX) return;
-        startTimerIfNeeded();
+        if(!startTime){
+          startTime = Date.now();
+          timerInterval = setInterval(updateTimer,1000);
+        }
         count++;
         save();
-        clickBtn.animate([{transform:'scale(1)'},{transform:'scale(0.95)'},{transform:'scale(1)'}], {duration:120});
         updateUI();
       }
 
-      if(startTime && count < MAX){
+      // 初期描画
+      if(startTime && count < Number(targetInput.value)){
         timerInterval = setInterval(updateTimer,1000);
       }
       updateUI();
 
-      clickBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
+      clickBtn.onclick = e => { e.stopPropagation(); doClick(); };
+      card.onclick = e => {
+        if(e.target === clickBtn || e.target === resetBtn || e.target === targetInput) return;
         doClick();
-      });
-      card.addEventListener('click', (e)=>{
-        if(e.target===clickBtn || e.target===resetBtn) return;
-        doClick();
-      });
+      };
 
-      resetBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if(!confirm('本当にリセットしますか？ 進捗は消えます。')) return;
+      targetInput.onchange = () => {
         count = 0;
         startTime = null;
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(COUNT_KEY);
         localStorage.removeItem(TIME_KEY);
-        if(timerInterval) clearInterval(timerInterval);
+        save();
         updateUI();
-      });
+      };
+
+      resetBtn.onclick = e => {
+        e.stopPropagation();
+        if(!confirm('本当にリセットしますか？')) return;
+        count = 0;
+        startTime = null;
+        localStorage.clear();
+        clearInterval(timerInterval);
+        updateUI();
+      };
     })();
   </script>
 </body>
