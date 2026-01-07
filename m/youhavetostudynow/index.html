@@ -104,9 +104,9 @@
         if(count >= MAX){
           clearInterval(timerInterval);
           const total = Math.floor((Date.now()-startTime)/1000);
-          headline.textContent = "完了！";
+          headline.textContent = "おめでとう！";
           sub.textContent = `かかった時間：${formatTime(total)}`;
-          remainingEl.textContent = "達成！";
+          remainingEl.textContent = "お疲れ様でした！！";
           timerDisplay.textContent = "";
           clickBtn.disabled = true;
           card.style.cursor = 'default';
