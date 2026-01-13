@@ -1,174 +1,264 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>共通テスト目標点クリック</title>
-  <style>
-    :root{
-      --bg1:#fff7e6; --bg2:#ffe6f0;
-      --card:#ffffff; --accent:#e91e63;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      display:grid; place-items:center;
-      font-family: system-ui,-apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
-      padding:24px;
-    }
-    .card{
-      width:min(720px,95%);
-      background:var(--card);
-      border-radius:16px;
-      box-shadow:0 12px 40px rgba(0,0,0,0.12);
-      padding:28px;
-      text-align:center;
-      user-select:none;
-      cursor:pointer;
-    }
-    .headline{font-size:40px;font-weight:700;color:#111;margin:8px 0;}
-    .big-number{font-size:96px;font-weight:900;color:var(--accent);line-height:1;}
-    .sub{color:#444;margin-top:6px;font-size:16px;}
-    .counter{margin-top:18px;font-size:18px;color:#333;}
-    .controls{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
-    button,input{
-      padding:10px 14px;border-radius:10px;border:1px solid #ddd;
-      font-weight:600;
-    }
-    button{
-      background:#111;color:#fff;cursor:pointer;border:0;
-    }
-    button.secondary{background:#fff;border:1px solid #ddd;color:#111}
-    button:disabled{opacity:0.6;cursor:not-allowed}
-    .smallnote{margin-top:12px;color:#666;font-size:13px}
-    .time{margin-top:12px;font-size:18px;color:#e91e63;font-weight:bold;}
-  </style>
+<meta charset="utf-8">
+
+<!-- スクロール・ズーム完全防止 -->
+<meta name="viewport"
+  content="width=device-width,
+           initial-scale=1,
+           maximum-scale=1,
+           user-scalable=no">
+
+<title>100回クリックチャレンジ！！</title>
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;            /* スクロール禁止 */
+  overscroll-behavior:none;   /* 引っ張り防止 */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#e8f6ff,#fff0f5);
+  font-family: system-ui, sans-serif;
+}
+
+.card{
+  width:min(720px,95%);
+  background:#fff;
+  border-radius:20px;
+  padding:32px;
+  text-align:center;
+  box-shadow:0 15px 40px rgba(0,0,0,0.12);
+  user-select:none;
+  cursor:pointer;
+  touch-action:manipulation;  /* ダブルタップズーム無効 */
+}
+
+h1{
+  margin:0;
+  font-size:32px;
+}
+
+.desc{
+  margin:12px 0 18px;
+  font-size:15px;
+  color:#555;
+  line-height:1.6;
+}
+
+.count{
+  font-size:72px;
+  font-weight:900;
+  color:#ff4081;
+  margin:10px 0;
+}
+
+.time{
+  font-size:28px;
+  font-weight:bold;
+  color:#2196f3;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:12px 0;
+  font-size:18px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:22px;
+  font-size:28px;
+  border-radius:16px;
+  border:none;
+  background:#ff4081;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:18px;
+}
+
+button:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
+.reset{
+  margin-top:28px;
+  background:#eee;
+  color:#333;
+  font-size:18px;
+}
+
+.ranking{
+  margin-top:20px;
+  font-size:14px;
+  color:#444;
+}
+</style>
 </head>
+
 <body>
-  <div class="card" id="card">
-    <div class="headline" id="headlineText"></div>
-    <div class="sub" id="subText"></div>
+<div class="card" id="card">
+  <h1>100回クリックチャレンジ！！</h1>
 
-    <div class="counter" id="remaining"></div>
-    <div class="time" id="timerDisplay"></div>
-
-    <div class="controls">
-      <input type="number" id="targetInput" min="1" value="100">
-      <button id="clickBtn">クリック</button>
-      <button id="resetBtn" class="secondary">リセット</button>
-    </div>
-
-    <div class="smallnote">※ 進捗と目標回数はこのブラウザに保存されます。</div>
+  <div class="desc">
+    100回クリックチャレンジ！<br>
+    素早くクリックボタンをクリックして、世界中のプレイヤーと
+    クリックスピードを競い合おう！<br>
+    勉強の息抜きに、レッツトライ！
   </div>
 
-  <script>
-    (function(){
-      const COUNT_KEY = 'click_count_v4';
-      const TIME_KEY  = 'click_start_time_v4';
-      const TARGET_KEY = 'click_target_v4';
+  <input id="nameInput" placeholder="ニックネームを入力">
 
-      const card = document.getElementById('card');
-      const clickBtn = document.getElementById('clickBtn');
-      const resetBtn = document.getElementById('resetBtn');
-      const remainingEl = document.getElementById('remaining');
-      const headline = document.getElementById('headlineText');
-      const sub = document.getElementById('subText');
-      const timerDisplay = document.getElementById('timerDisplay');
-      const targetInput = document.getElementById('targetInput');
+  <div class="count" id="count">0 / 100</div>
+  <div class="time" id="time">0.0 秒</div>
 
-      let count = 0;
-      let startTime = null;
-      let timerInterval = null;
+  <button id="clickBtn">クリック！</button>
+  <button class="reset" id="resetBtn">リセット</button>
 
-      // 保存データ読み込み
-      count = Number(localStorage.getItem(COUNT_KEY)) || 0;
-      startTime = Number(localStorage.getItem(TIME_KEY)) || null;
-      targetInput.value = Number(localStorage.getItem(TARGET_KEY)) || 800;
+  <div class="ranking" id="ranking"></div>
+</div>
 
-      function formatTime(sec){
-        const m = Math.floor(sec/60);
-        const s = sec % 60;
-        return m ? `${m}分${s}秒` : `${s}秒`;
-      }
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc,
+  getDocs, query, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-      function updateTimer(){
-        if(!startTime) return;
-        const elapsed = Math.floor((Date.now()-startTime)/1000);
-        timerDisplay.textContent = `経過時間: ${formatTime(elapsed)}`;
-      }
+/* Firebase設定 */
+const firebaseConfig = {
+  apiKey: "AIzaSyDuvDzmbIigTcXYqxN1dkLDg793sUy3src",
+  authDomain: "go-kaku.firebaseapp.com",
+  projectId: "go-kaku",
+  storageBucket: "go-kaku.firebasestorage.app",
+  messagingSenderId: "373881843090",
+  appId: "1:373881843090:web:d30e6265d809034e62654b",
+  measurementId: "G-RWSGKGVCQY"
+};
 
-      function updateUI(){
-        const MAX = Number(targetInput.value);
-        const remaining = Math.max(0, MAX - count);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-        if(count >= MAX){
-          clearInterval(timerInterval);
-          const total = Math.floor((Date.now()-startTime)/1000);
-          headline.textContent = "おめでとう！";
-          sub.textContent = `かかった時間：${formatTime(total)}`;
-          remainingEl.textContent = "お疲れ様でした！！";
-          timerDisplay.textContent = "";
-          clickBtn.disabled = true;
-          card.style.cursor = 'default';
-        }else{
-          headline.innerHTML = `残り <span class="big-number">${remaining}</span> 回`;
-          sub.textContent = "共通テストの目標点を下に入力して、クリックボタンを押してください。目標に向かって、前進前進！！";
-          remainingEl.textContent = `残り: ${remaining} 回`;
-          clickBtn.disabled = false;
-          card.style.cursor = 'pointer';
-          updateTimer();
-        }
-      }
+/* ゲーム設定 */
+const MAX = 100;
+let count = 0;
+let startTime = null;
+let timer = null;
 
-      function save(){
-        localStorage.setItem(COUNT_KEY, count);
-        localStorage.setItem(TARGET_KEY, targetInput.value);
-        if(startTime) localStorage.setItem(TIME_KEY, startTime);
-      }
+const countEl = document.getElementById("count");
+const timeEl = document.getElementById("time");
+const clickBtn = document.getElementById("clickBtn");
+const resetBtn = document.getElementById("resetBtn");
+const card = document.getElementById("card");
+const rankingEl = document.getElementById("ranking");
+const nameInput = document.getElementById("nameInput");
 
-      function doClick(){
-        const MAX = Number(targetInput.value);
-        if(count >= MAX) return;
-        if(!startTime){
-          startTime = Date.now();
-          timerInterval = setInterval(updateTimer,1000);
-        }
-        count++;
-        save();
-        updateUI();
-      }
+/* ニックネーム保存 */
+nameInput.value = localStorage.getItem("nickname") || "";
+nameInput.onchange = () => {
+  localStorage.setItem("nickname", nameInput.value);
+};
 
-      // 初期描画
-      if(startTime && count < Number(targetInput.value)){
-        timerInterval = setInterval(updateTimer,1000);
-      }
-      updateUI();
+/* タイマー */
+function startTimer(){
+  startTime = performance.now();
+  timer = setInterval(()=>{
+    const t = (performance.now()-startTime)/1000;
+    timeEl.textContent = t.toFixed(1) + " 秒";
+  },100);
+}
 
-      clickBtn.onclick = e => { e.stopPropagation(); doClick(); };
-      card.onclick = e => {
-        if(e.target === clickBtn || e.target === resetBtn || e.target === targetInput) return;
-        doClick();
-      };
+/* クリック処理 */
+async function doClick(){
+  if(count >= MAX) return;
+  if(!nameInput.value){
+    alert("ニックネームを入力してください");
+    return;
+  }
 
-      targetInput.onchange = () => {
-        count = 0;
-        startTime = null;
-        localStorage.removeItem(COUNT_KEY);
-        localStorage.removeItem(TIME_KEY);
-        save();
-        updateUI();
-      };
+  if(count === 0) startTimer();
+  count++;
+  countEl.textContent = `${count} / 100`;
 
-      resetBtn.onclick = e => {
-        e.stopPropagation();
-        if(!confirm('本当にリセットしますか？')) return;
-        count = 0;
-        startTime = null;
-        localStorage.clear();
-        clearInterval(timerInterval);
-        updateUI();
-      };
-    })();
-  </script>
+  if(count === MAX){
+    clearInterval(timer);
+    const finalTime = ((performance.now()-startTime)/1000).toFixed(1);
+    timeEl.textContent = finalTime + " 秒";
+    clickBtn.disabled = true;
+
+    await addDoc(collection(db,"scores"),{
+      name: nameInput.value,
+      time: Number(finalTime),
+      created: serverTimestamp()
+    });
+
+    loadRanking(Number(finalTime));
+  }
+}
+
+/* ランキング表示（上位10＋自分の順位） */
+async function loadRanking(myTime){
+  const topQuery = query(
+    collection(db,"scores"),
+    orderBy("time"),
+    limit(10)
+  );
+  const topSnap = await getDocs(topQuery);
+
+  let html = "<b>🏆 ランキング（上位10人）</b><br>";
+  let rank = 1;
+
+  topSnap.forEach(doc=>{
+    const d = doc.data();
+    html += `${rank}位：${d.name}（${d.time} 秒）<br>`;
+    rank++;
+  });
+
+  const allQuery = query(
+    collection(db,"scores"),
+    orderBy("time")
+  );
+  const allSnap = await getDocs(allQuery);
+
+  const allTimes = [];
+  allSnap.forEach(doc=>{
+    allTimes.push(doc.data().time);
+  });
+
+  const myRank = allTimes.findIndex(t => t === myTime) + 1;
+
+  html += `<br><b>あなたの順位：${myRank}位 / ${allTimes.length}人</b>`;
+  rankingEl.innerHTML = html;
+}
+
+/* リセット */
+resetBtn.onclick = e=>{
+  e.stopPropagation();
+  count = 0;
+  startTime = null;
+  clearInterval(timer);
+  clickBtn.disabled = false;
+  countEl.textContent = "0 / 100";
+  timeEl.textContent = "0.0 秒";
+};
+
+/* どこをクリックしてもOK */
+clickBtn.onclick = e=>{ e.stopPropagation(); doClick(); };
+card.onclick = e=>{
+  if(e.target === resetBtn || e.target === nameInput) return;
+  doClick();
+};
+
+/* 初期ランキング */
+loadRanking(0);
+</script>
 </body>
 </html>
